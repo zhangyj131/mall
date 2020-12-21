@@ -1,6 +1,9 @@
 package com.macro.mall.security.component;
 
 import com.macro.mall.security.config.IgnoreUrlsConfig;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.SecurityMetadataSource;
@@ -19,11 +22,13 @@ import java.io.IOException;
  * Created by macro on 2020/2/7.
  */
 public class DynamicSecurityFilter extends AbstractSecurityInterceptor implements Filter {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicSecurityFilter.class);
     @Autowired
     private DynamicSecurityMetadataSource dynamicSecurityMetadataSource;
     @Autowired
     private IgnoreUrlsConfig ignoreUrlsConfig;
+    
+    private static final String FILTER_APPLIED = "__spring_security_demoFilter_filterApplied";
 
     @Autowired
     public void setMyAccessDecisionManager(DynamicAccessDecisionManager dynamicAccessDecisionManager) {
@@ -36,11 +41,18 @@ public class DynamicSecurityFilter extends AbstractSecurityInterceptor implement
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+    	if (servletRequest.getAttribute(FILTER_APPLIED) != null) {
+    		filterChain.doFilter(servletRequest, servletResponse);
+    		return ;
+    	}
+    	servletRequest.setAttribute(FILTER_APPLIED,true);
+    	
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         FilterInvocation fi = new FilterInvocation(servletRequest, servletResponse, filterChain);
         //OPTIONS请求直接放行
         if(request.getMethod().equals(HttpMethod.OPTIONS.toString())){
             fi.getChain().doFilter(fi.getRequest(), fi.getResponse());
+            LOGGER.warn("OPTIONS请求，忽略");
             return;
         }
         //白名单请求直接放行
@@ -48,6 +60,7 @@ public class DynamicSecurityFilter extends AbstractSecurityInterceptor implement
         for (String path : ignoreUrlsConfig.getUrls()) {
             if(pathMatcher.match(path,request.getRequestURI())){
                 fi.getChain().doFilter(fi.getRequest(), fi.getResponse());
+                LOGGER.warn("白名单请求，忽略");
                 return;
             }
         }

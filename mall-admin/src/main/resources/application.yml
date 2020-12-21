@@ -1,3 +1,6 @@
+server:
+  port: 8082
+  
 spring:
   profiles:
     active: dev #默认为开发环境
@@ -44,6 +47,7 @@ secure:
       - /admin/info
       - /admin/logout
       - /minio/upload
+      - /aliyun/oss/callback
 
 aliyun:
   oss:
@@ -54,7 +58,7 @@ aliyun:
     policy:
       expire: 300 # 签名有效期(S)
     maxSize: 10 # 上传文件大小(M)
-    callback: http://39.98.190.128:8080/aliyun/oss/callback # 文件上传成功后的回调地址
+    callback: http://112.64.41.243:8082/aliyun/oss/callback # 文件上传成功后的回调地址，这里要改为家里网络外网地址
     dir:
       prefix: mall/images/ # 上传文件夹路径前缀
 

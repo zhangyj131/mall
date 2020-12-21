@@ -2,6 +2,10 @@ package com.macro.mall;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.macro.mall.model.PmsProduct;
+
+import java.util.*;
+import java.util.stream.*;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -28,4 +32,14 @@ public class MallDemoApplicationTests {
 		logger.error(mapper.writeValueAsString(product));
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

@@ -4,6 +4,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.json.JSON;
 import cn.hutool.json.JSONUtil;
+
+import com.macro.mall.admin.repository.WebLogCollectionRepository;
 import com.macro.mall.bo.WebLog;
 import io.swagger.annotations.ApiOperation;
 import net.logstash.logback.marker.Markers;
@@ -14,6 +16,7 @@ import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -26,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +43,8 @@ import java.util.Map;
 @Order(1)
 public class WebLogAspect {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebLogAspect.class);
+    @Autowired
+    private WebLogCollectionRepository webLogCollectionRepository;
 
     @Pointcut("execution(public * com.macro.mall.controller.*.*(..))")
     public void webLog() {
@@ -79,6 +85,9 @@ public class WebLogAspect {
         webLog.setStartTime(startTime);
         webLog.setUri(request.getRequestURI());
         webLog.setUrl(request.getRequestURL().toString());
+        webLog.setCreateAt(new Date());
+        webLogCollectionRepository.save(webLog);
+        
         Map<String,Object> logMap = new HashMap<>();
         logMap.put("url",webLog.getUrl());
         logMap.put("method",webLog.getMethod());

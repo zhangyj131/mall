@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,12 +28,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
+ * 已看
  * 后台用户管理
  * Created by macro on 2018/4/26.
  */
 @Controller
 @Api(tags = "UmsAdminController", description = "后台用户管理")
 @RequestMapping("/admin")
+@Validated
 public class UmsAdminController {
     @Value("${jwt.tokenHeader}")
     private String tokenHeader;
@@ -43,10 +46,11 @@ public class UmsAdminController {
     @Autowired
     private UmsRoleService roleService;
 
+    //心增用户
     @ApiOperation(value = "用户注册")
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult<UmsAdmin> register(@RequestBody UmsAdminParam umsAdminParam, BindingResult result) {
+    public CommonResult<UmsAdmin> register(@Validated @RequestBody UmsAdminParam umsAdminParam, BindingResult result) {
         UmsAdmin umsAdmin = adminService.register(umsAdminParam);
         if (umsAdmin == null) {
             CommonResult.failed();
@@ -57,7 +61,7 @@ public class UmsAdminController {
     @ApiOperation(value = "登录以后返回token")
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult login(@RequestBody UmsAdminLoginParam umsAdminLoginParam, BindingResult result) {
+    public CommonResult login(@Validated @RequestBody UmsAdminLoginParam umsAdminLoginParam, BindingResult result) {
         String token = adminService.login(umsAdminLoginParam.getUsername(), umsAdminLoginParam.getPassword());
         if (token == null) {
             return CommonResult.validateFailed("用户名或密码错误");
@@ -83,6 +87,23 @@ public class UmsAdminController {
         return CommonResult.success(tokenMap);
     }
 
+    /*
+     * 	FIXME 写博客
+     * 这里的参数是java.security.Principal第一次遇到，通常controller方法的参数是要接收的数据或者就是
+     * ServletRequest / HttpServletRequest / MultipartRequest / MultipartHttpServletRequest /HttpServletResponse
+     * 这里是java.security.Principal，那么servlet是如何传入这个参数的呢？
+     * 详情见堆栈
+     * ServletRequestMethodArgumentResolver.resolveArgument(Class<?>, HttpServletRequest)
+		ServletRequestMethodArgumentResolver.resolveArgument(MethodParameter, ModelAndViewContainer, NativeWebRequest, WebDataBinderFactory)
+		HandlerMethodArgumentResolverComposite.resolveArgument(MethodParameter, ModelAndViewContainer, NativeWebRequest, WebDataBinderFactory)
+		ServletInvocableHandlerMethod(InvocableHandlerMethod).getMethodArgumentValues(NativeWebRequest, ModelAndViewContainer, Object...)
+		ServletInvocableHandlerMethod(InvocableHandlerMethod).invokeForRequest(NativeWebRequest, ModelAndViewContainer, Object...)
+		
+		关键在org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(MethodParameter, ModelAndViewContainer, NativeWebRequest, WebDataBinderFactory)方法内的HandlerMethodArgumentResolver resolver = getArgumentResolver(parameter);获取不同的解析器
+		可以写个博客了
+		
+		断点打在 org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(NativeWebRequest, ModelAndViewContainer, Object...)
+     */
     @ApiOperation(value = "获取当前登录用户信息")
     @RequestMapping(value = "/info", method = RequestMethod.GET)
     @ResponseBody
@@ -143,7 +164,7 @@ public class UmsAdminController {
     @ApiOperation("修改指定用户密码")
     @RequestMapping(value = "/updatePassword", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult updatePassword(@RequestBody UpdateAdminPasswordParam updatePasswordParam) {
+    public CommonResult updatePassword(@Validated @RequestBody UpdateAdminPasswordParam updatePasswordParam) {
         int status = adminService.updatePassword(updatePasswordParam);
         if (status > 0) {
             return CommonResult.success(status);

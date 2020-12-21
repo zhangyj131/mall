@@ -1,9 +1,14 @@
 package com.macro.mall.bo;
 
+import java.util.Date;
+
+import lombok.Data;
+
 /**
  * Controller层的日志封装类
  * Created by macro on 2018/4/26.
  */
+@Data
 public class WebLog {
     /**
      * 操作描述
@@ -53,6 +58,8 @@ public class WebLog {
     private Object parameter;
 
     private Object result;
+    
+    private Date createAt;
 
     public String getDescription() {
         return description;

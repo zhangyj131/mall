@@ -1,6 +1,7 @@
 package com.macro.mall.service.impl;
 
 import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.macro.mall.dao.UmsRoleDao;
 import com.macro.mall.dao.UmsRolePermissionRelationDao;
 import com.macro.mall.mapper.UmsRoleMapper;
@@ -90,12 +91,15 @@ public class UmsRoleServiceImpl implements UmsRoleService {
 
     @Override
     public List<UmsRole> list(String keyword, Integer pageSize, Integer pageNum) {
-        PageHelper.startPage(pageNum, pageSize);
+//        PageHelper.startPage(pageNum, pageSize);
         UmsRoleExample example = new UmsRoleExample();
         if (!StringUtils.isEmpty(keyword)) {
             example.createCriteria().andNameLike("%" + keyword + "%");
         }
-        return roleMapper.selectByExample(example);
+//        return roleMapper.selectByExample(example);
+    	PageInfo<UmsRole> doSelectPageInfo = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> roleMapper.selectByExample(example));
+    	List<UmsRole> target = doSelectPageInfo.getList();
+    	return target;
     }
 
     @Override

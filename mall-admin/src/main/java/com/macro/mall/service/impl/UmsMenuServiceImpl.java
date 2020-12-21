@@ -98,6 +98,8 @@ public class UmsMenuServiceImpl implements UmsMenuService {
         BeanUtils.copyProperties(menu, node);
         List<UmsMenuNode> children = menuList.stream()
                 .filter(subMenu -> subMenu.getParentId().equals(menu.getId()))
+                //map：翻译成映射最合适了，通过原始数据元素，映射出新的类型
+                //这里的map就是把UmsMenu类型转换为UmsMenuNode类型
                 .map(subMenu -> covertMenuNode(subMenu, menuList)).collect(Collectors.toList());
         node.setChildren(children);
         return node;
