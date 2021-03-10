@@ -10,3 +10,7 @@ target/
 .classpath
 .project
 rebel.xml
+**/*.iml
+**/rebel.xml
+rebel.xml
+/mall-security/src/main/resources/rebel.xml
